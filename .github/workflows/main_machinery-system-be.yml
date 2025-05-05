@@ -64,11 +64,13 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_25703A2789F6472DB254269C62861E99 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6CBF9BDF694E4170AA7C9B3E6D899C38 }}
 
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'Machinery-system-be'
-          slot-name: 'Production'
-          package: .
+      - name: 'Deploy to Azure WebApp with Retry'
+        run: |
+              for i in {1..5}; do
+                echo "Attempt $i to deploy..."
+                npx azure-actions-webapp-publish \
+                  --app-name "<your-app-name>" \
+                  --publish-profile "${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}" \
+                  --package "<path-to-package>" && break || sleep 15
+              done
           
